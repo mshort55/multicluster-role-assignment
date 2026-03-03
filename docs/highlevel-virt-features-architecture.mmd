@@ -1,0 +1,76 @@
+---
+config:
+  themeVariables:
+    edgeLabelBackground: '#0f0f0f'
+id: 1f9c0a25-c421-494b-87c2-61c4afdfb8de
+---
+graph TD
+    subgraph Architecture
+        direction TB
+        subgraph HUB ["ACM Hub Cluster"]
+            CNVUI["🖥️ Fleet Virtualization UI<br/>(CNV)"]
+            CCLMUI["🖥️ Cross Cluster Live Migration UI<br/>(CNV)"]
+            RBACUI["📸 Fine Grained RBAC UI<br/>(ACM)"]
+            SDK["📸 Multicluster-SDK<br/>(Connector)"]
+
+            CNVUI & CCLMUI --> SDK
+            RBACUI --> MRA
+            CCLMUI --> CCLM
+            
+            subgraph ACCESS ["Access Layer"]
+                SEARCH["🔎 ACM Search<br/>(Database of managed cluster K8s resources)"]
+                PROXY["🔐 ACM Cluster Proxy<br/>(Connection to managed cluster K8s APIs)"]
+            end
+
+            SDK --> SEARCH & PROXY
+            
+            subgraph RBAC ["RBAC"]
+                MRA["🔋&nbsp;MulticlusterRoleAssignment<br/>(Custom Resource)"]
+                AGGAPI["🔐 Aggregate API<br/>(The UserPermissions internal API, not exposed to customers)"]
+                CP["🔐 ClusterPermission<br/>(Custom Resource)"]
+
+                MRA --->|Manages| CP
+                SEARCH -.-> AGGAPI
+            end
+
+            subgraph CCLM ["Cross Cluster Live Migration"]
+                MTV["🚛 🔋 MTV + ACM Integration<br/>(mtv-integrations)"]
+            end
+        end
+
+        subgraph SPOKES ["Managed Clusters"]
+            S1["Cluster A<br/>🚀 Virtual Machines"]
+            S2["Cluster B<br/>🚀 Virtual Machines"]
+        end
+
+        PROXY -->|K8s API Access| S1 & S2
+        CP -->|Creates Role Bindings| S1 & S2
+        AGGAPI -.->|Reads| CP
+        MTV -->|Orchestrates| S1 & S2
+    end
+
+    subgraph LEGEND ["Legend - Component Teams"]
+        TEAM1["🚀 CNV Core"]
+        TEAM2["🖥️ CNV Console"]
+        TEAM3["🚛 CNV MTV"]
+        TEAM4["📸 ACM Console"]
+        TEAM5["🔎 ACM Search"]
+        TEAM6["🔐 ACM Server Foundation"]
+        TEAM7["🔋 ACM Workloads"]
+    end
+
+    classDef transparentBox fill:none,stroke:none,stroke-width:0px
+    classDef primaryBox fill:#000000,stroke:#8F0100,stroke-width:2px,color:#FFFFFF
+    classDef secondaryBox fill:#1a1a1a,stroke:#8F0100,stroke-width:2px,color:#FFFFFF
+    classDef darkRedNode fill:#5e0000,stroke:#8F0100,stroke-width:2px,color:#FFFFFF
+    classDef brightRedNode fill:#8F0100,stroke:#5e0000,stroke-width:2px,color:#FFFFFF
+    classDef teamNode fill:#2a2a2a,stroke:#8F0100,stroke-width:2px,color:#FFFFFF
+
+    class Architecture transparentBox
+    class HUB,SPOKES primaryBox
+    class RBAC,ACCESS,CCLM,LEGEND secondaryBox
+    class CNVUI,RBACUI,CCLMUI,SDK,S1,S2 darkRedNode
+    class MRA,AGGAPI,CP,SEARCH,PROXY,MTV brightRedNode
+    class TEAM1,TEAM2,TEAM3,TEAM4,TEAM5,TEAM6,TEAM7 teamNode
+
+    linkStyle default stroke:#FFFFFF,stroke-width:2px,color:#FFFFFF
