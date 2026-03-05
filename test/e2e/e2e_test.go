@@ -2476,7 +2476,7 @@ var _ = Describe("Manager", Ordered, func() {
 				It("should have MRA status reflecting PlacementNotFound", Label("allows-errors"), func() {
 					By("patching the MRA to reference non-existent Placement")
 					spec := mrav1beta1.MulticlusterRoleAssignmentSpec{
-						Subject: rbacv1.Subject{
+						Subject: mrav1beta1.Subject{
 							Kind:     "User",
 							Name:     "test-user-single-clusterrolebinding",
 							APIGroup: "rbac.authorization.k8s.io",
@@ -2519,7 +2519,7 @@ var _ = Describe("Manager", Ordered, func() {
 				It("should patch MRA back to valid placement", func() {
 					By("patching the MRA to reference valid Placement again")
 					spec := mrav1beta1.MulticlusterRoleAssignmentSpec{
-						Subject: rbacv1.Subject{
+						Subject: mrav1beta1.Subject{
 							Kind:     "User",
 							Name:     "test-user-single-clusterrolebinding",
 							APIGroup: "rbac.authorization.k8s.io",
@@ -2710,7 +2710,7 @@ var _ = Describe("Manager", Ordered, func() {
 
 					By("patching MRA to reference TWO overlapping placements in one roleAssignment")
 					spec := mrav1beta1.MulticlusterRoleAssignmentSpec{
-						Subject: rbacv1.Subject{
+						Subject: mrav1beta1.Subject{
 							Kind:     "User",
 							Name:     "test-user-single-clusterrolebinding",
 							APIGroup: "rbac.authorization.k8s.io",

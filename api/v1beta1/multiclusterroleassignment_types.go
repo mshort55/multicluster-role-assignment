@@ -17,15 +17,14 @@ limitations under the License.
 package v1beta1
 
 import (
-	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // MulticlusterRoleAssignmentSpec defines the desired state of MulticlusterRoleAssignment.
 type MulticlusterRoleAssignmentSpec struct {
-	// Subject defines the user, group, or service account for all role assignments.
+	// Subject defines the user or group for all role assignments.
 	// +kubebuilder:validation:Required
-	Subject rbacv1.Subject `json:"subject"`
+	Subject Subject `json:"subject"`
 
 	// RoleAssignments defines the list of role assignments for different roles, namespaces, and cluster sets.
 	// +kubebuilder:validation:Required
@@ -33,6 +32,28 @@ type MulticlusterRoleAssignmentSpec struct {
 	// +listType=map
 	// +listMapKey=name
 	RoleAssignments []RoleAssignment `json:"roleAssignments"`
+}
+
+// Subject defines the user or group for role assignments.
+// +kubebuilder:validation:XValidation:rule="!(self.kind in ['User', 'Group']) || !has(self.namespace) || size(self.namespace) == 0",message="namespace must be empty for User and Group kinds"
+type Subject struct {
+	// API group of the referenced subject.
+	// +kubebuilder:validation:Enum="";rbac.authorization.k8s.io
+	// +optional
+	APIGroup string `json:"apiGroup,omitempty"`
+
+	// Kind of the subject. Accepted values are "User" and "Group".
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Enum=User;Group
+	Kind string `json:"kind"`
+
+	// Name of the subject.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+
+	// Namespace of the referenced subject. Must be empty for "User" or "Group" kinds.
+	// +optional
+	Namespace string `json:"namespace,omitempty"`
 }
 
 // RoleAssignment defines a cluster role assignment to specific namespaces and clusters.

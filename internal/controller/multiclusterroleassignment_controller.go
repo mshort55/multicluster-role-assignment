@@ -1212,7 +1212,7 @@ func (r *MulticlusterRoleAssignmentReconciler) calculateDesiredClusterPermission
 					Name:     roleAssignment.ClusterRole,
 					APIGroup: rbacv1.GroupName,
 				},
-				Subjects: []rbacv1.Subject{mra.Spec.Subject},
+				Subjects: []rbacv1.Subject{convertSubject(mra.Spec.Subject)},
 			}
 			desiredSlice.ClusterRoleBindings = append(desiredSlice.ClusterRoleBindings, clusterRoleBinding)
 		} else {
@@ -1229,7 +1229,7 @@ func (r *MulticlusterRoleAssignmentReconciler) calculateDesiredClusterPermission
 						Name:     roleAssignment.ClusterRole,
 						APIGroup: rbacv1.GroupName,
 					},
-					Subjects: []rbacv1.Subject{mra.Spec.Subject},
+					Subjects: []rbacv1.Subject{convertSubject(mra.Spec.Subject)},
 				}
 				desiredSlice.RoleBindings = append(desiredSlice.RoleBindings, roleBinding)
 			}
@@ -1237,6 +1237,16 @@ func (r *MulticlusterRoleAssignmentReconciler) calculateDesiredClusterPermission
 	}
 
 	return desiredSlice
+}
+
+// convertSubject converts a v1beta1.Subject to rbacv1.Subject for use in role bindings.
+func convertSubject(s mrav1beta1.Subject) rbacv1.Subject {
+	return rbacv1.Subject{
+		Kind:      s.Kind,
+		APIGroup:  s.APIGroup,
+		Name:      s.Name,
+		Namespace: s.Namespace,
+	}
 }
 
 // extractOthersClusterPermissionSlice extracts all bindings and annotations NOT owned by this
