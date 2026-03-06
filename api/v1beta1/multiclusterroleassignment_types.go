@@ -63,9 +63,11 @@ type RoleAssignment struct {
 	// +kubebuilder:validation:MinLength=1
 	Name string `json:"name"`
 
-	// ClusterRole defines the cluster role name to be assigned.
+	// ClusterRole defines the cluster role name to be assigned. Must be a valid Kubernetes resource name (DNS subdomain).
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:MaxLength=253
+	// +kubebuilder:validation:Pattern=`^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`
 	ClusterRole string `json:"clusterRole"`
 
 	// TargetNamespaces defines what namespaces the role should be applied in for all selected clusters in the role
