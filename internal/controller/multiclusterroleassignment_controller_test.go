@@ -121,7 +121,7 @@ var _ = Describe("MulticlusterRoleAssignment Controller", Ordered, func() {
 				Finalizers: []string{finalizerName},
 			},
 			Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-				Subject: rbacv1.Subject{
+				Subject: mrav1beta1.Subject{
 					Kind: "User",
 					Name: "test-user",
 				},
@@ -270,7 +270,7 @@ var _ = Describe("MulticlusterRoleAssignment Controller", Ordered, func() {
 					Namespace: multiclusterRoleAssignmentNamespace,
 				},
 				Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-					Subject: rbacv1.Subject{
+					Subject: mrav1beta1.Subject{
 						Kind:     "User",
 						APIGroup: "rbac.authorization.k8s.io",
 						Name:     "test-user-pd-lookup",
@@ -356,7 +356,7 @@ var _ = Describe("MulticlusterRoleAssignment Controller", Ordered, func() {
 					Namespace: "default",
 				},
 				Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-					Subject: rbacv1.Subject{
+					Subject: mrav1beta1.Subject{
 						Kind:     "User",
 						APIGroup: "rbac.authorization.k8s.io",
 						Name:     "test-user",
@@ -443,7 +443,7 @@ var _ = Describe("MulticlusterRoleAssignment Controller", Ordered, func() {
 					Namespace: "default",
 				},
 				Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-					Subject: rbacv1.Subject{
+					Subject: mrav1beta1.Subject{
 						Kind:     "User",
 						APIGroup: "rbac.authorization.k8s.io",
 						Name:     "test-user",
@@ -530,7 +530,7 @@ var _ = Describe("MulticlusterRoleAssignment Controller", Ordered, func() {
 					Namespace: "default",
 				},
 				Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-					Subject: rbacv1.Subject{
+					Subject: mrav1beta1.Subject{
 						Kind:     "User",
 						APIGroup: "rbac.authorization.k8s.io",
 						Name:     "test-user",
@@ -716,7 +716,7 @@ var _ = Describe("MulticlusterRoleAssignment Controller", Ordered, func() {
 					Namespace: multiclusterRoleAssignmentNamespace,
 				},
 				Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-					Subject: rbacv1.Subject{
+					Subject: mrav1beta1.Subject{
 						Kind:     "User",
 						APIGroup: "rbac.authorization.k8s.io",
 						Name:     "test-user",
@@ -878,7 +878,7 @@ var _ = Describe("MulticlusterRoleAssignment Controller", Ordered, func() {
 					Namespace: multiclusterRoleAssignmentNamespace,
 				},
 				Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-					Subject: rbacv1.Subject{
+					Subject: mrav1beta1.Subject{
 						Kind:     "User",
 						APIGroup: "rbac.authorization.k8s.io",
 						Name:     "test-user",
@@ -988,7 +988,7 @@ var _ = Describe("MulticlusterRoleAssignment Controller", Ordered, func() {
 					Namespace: multiclusterRoleAssignmentNamespace,
 				},
 				Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-					Subject: rbacv1.Subject{
+					Subject: mrav1beta1.Subject{
 						Kind:     "User",
 						APIGroup: "rbac.authorization.k8s.io",
 						Name:     "test-user",
@@ -1093,7 +1093,7 @@ var _ = Describe("MulticlusterRoleAssignment Controller", Ordered, func() {
 					Namespace: multiclusterRoleAssignmentNamespace,
 				},
 				Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-					Subject: rbacv1.Subject{
+					Subject: mrav1beta1.Subject{
 						Kind:     "User",
 						APIGroup: "rbac.authorization.k8s.io",
 						Name:     "test-user",
@@ -1161,7 +1161,7 @@ var _ = Describe("MulticlusterRoleAssignment Controller", Ordered, func() {
 					Namespace: multiclusterRoleAssignmentNamespace,
 				},
 				Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-					Subject: rbacv1.Subject{
+					Subject: mrav1beta1.Subject{
 						Kind:     "User",
 						APIGroup: "rbac.authorization.k8s.io",
 						Name:     "test-user",
@@ -1273,7 +1273,7 @@ var _ = Describe("MulticlusterRoleAssignment Controller", Ordered, func() {
 					Namespace: multiclusterRoleAssignmentNamespace,
 				},
 				Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-					Subject: rbacv1.Subject{
+					Subject: mrav1beta1.Subject{
 						Kind:     "User",
 						APIGroup: "rbac.authorization.k8s.io",
 						Name:     "test-user",
@@ -1389,7 +1389,7 @@ var _ = Describe("MulticlusterRoleAssignment Controller", Ordered, func() {
 					Namespace: multiclusterRoleAssignmentNamespace,
 				},
 				Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-					Subject: rbacv1.Subject{
+					Subject: mrav1beta1.Subject{
 						Kind:     "User",
 						APIGroup: "rbac.authorization.k8s.io",
 						Name:     "test-user",
@@ -1498,7 +1498,7 @@ var _ = Describe("MulticlusterRoleAssignment Controller", Ordered, func() {
 					Namespace: multiclusterRoleAssignmentNamespace,
 				},
 				Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-					Subject: rbacv1.Subject{
+					Subject: mrav1beta1.Subject{
 						Kind:     "User",
 						APIGroup: "rbac.authorization.k8s.io",
 						Name:     "test-user",
@@ -1663,7 +1663,7 @@ var _ = Describe("MulticlusterRoleAssignment Controller", Ordered, func() {
 					Namespace: multiclusterRoleAssignmentNamespace,
 				},
 				Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-					Subject: rbacv1.Subject{
+					Subject: mrav1beta1.Subject{
 						Kind:     "User",
 						APIGroup: "rbac.authorization.k8s.io",
 						Name:     "test-user",
@@ -4296,7 +4296,7 @@ var _ = Describe("MulticlusterRoleAssignment Controller", Ordered, func() {
 					Finalizers: []string{finalizerName},
 				},
 				Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-					Subject: rbacv1.Subject{Kind: "User", Name: "test-user"},
+					Subject: mrav1beta1.Subject{Kind: "User", Name: "test-user"},
 					RoleAssignments: []mrav1beta1.RoleAssignment{
 						{
 							Name:        "error-test-assignment",
@@ -4694,7 +4694,7 @@ var _ = Describe("MulticlusterRoleAssignment Controller", Ordered, func() {
 					Namespace: "test-namespace",
 				},
 				Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-					Subject: rbacv1.Subject{
+					Subject: mrav1beta1.Subject{
 						Kind: "User",
 						Name: "test-user",
 					},
@@ -4897,7 +4897,7 @@ func TestHandleMulticlusterRoleAssignmentDeletion(t *testing.T) {
 			Namespace: "open-cluster-management",
 		},
 		Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-			Subject: rbacv1.Subject{
+			Subject: mrav1beta1.Subject{
 				Kind: "User",
 				Name: "test-user1",
 			},
@@ -4932,7 +4932,7 @@ func TestHandleMulticlusterRoleAssignmentDeletion(t *testing.T) {
 			Namespace: "open-cluster-management",
 		},
 		Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-			Subject: rbacv1.Subject{
+			Subject: mrav1beta1.Subject{
 				Kind: "User",
 				Name: "test-user2",
 			},
@@ -5149,7 +5149,7 @@ func TestAggregateClusters(t *testing.T) {
 			Namespace: "open-cluster-management",
 		},
 		Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-			Subject: rbacv1.Subject{
+			Subject: mrav1beta1.Subject{
 				Kind: "User",
 				Name: "test-user1",
 			},
@@ -5289,7 +5289,7 @@ func TestUpdateStatus(t *testing.T) {
 			ResourceVersion: "1",
 		},
 		Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-			Subject: rbacv1.Subject{
+			Subject: mrav1beta1.Subject{
 				Kind: "User",
 				Name: "test-user",
 			},
@@ -5350,7 +5350,7 @@ func TestUpdateStatus(t *testing.T) {
 				Namespace: "open-cluster-management",
 			},
 			Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-				Subject: rbacv1.Subject{
+				Subject: mrav1beta1.Subject{
 					Kind: "User",
 					Name: "test-user",
 				},
@@ -5780,7 +5780,7 @@ func TestEnsureClusterPermissionAttemptDeleteLogic(t *testing.T) {
 				Namespace: "test-namespace",
 			},
 			Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-				Subject: rbacv1.Subject{
+				Subject: mrav1beta1.Subject{
 					Kind: "User",
 					Name: "test-user",
 				},
@@ -5848,7 +5848,7 @@ func TestEnsureClusterPermissionAttemptDeleteLogic(t *testing.T) {
 				Namespace: "test-namespace",
 			},
 			Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-				Subject: rbacv1.Subject{
+				Subject: mrav1beta1.Subject{
 					Kind: "User",
 					Name: "test-user",
 				},
@@ -5919,7 +5919,7 @@ func TestEnsureClusterPermissionAttemptDeleteLogic(t *testing.T) {
 				Namespace: "test-namespace",
 			},
 			Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-				Subject: rbacv1.Subject{
+				Subject: mrav1beta1.Subject{
 					Kind: "User",
 					Name: "test-user",
 				},
@@ -5989,7 +5989,7 @@ func TestEnsureClusterPermissionAttemptDeleteLogic(t *testing.T) {
 				Namespace: "test-namespace",
 			},
 			Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-				Subject: rbacv1.Subject{
+				Subject: mrav1beta1.Subject{
 					Kind: "User",
 					Name: "test-user",
 				},
@@ -6081,7 +6081,7 @@ func TestEnsureClusterPermissionAttemptDeleteLogic(t *testing.T) {
 				Namespace: "test-namespace",
 			},
 			Spec: mrav1beta1.MulticlusterRoleAssignmentSpec{
-				Subject: rbacv1.Subject{
+				Subject: mrav1beta1.Subject{
 					Kind: "User",
 					Name: "test-user",
 				},

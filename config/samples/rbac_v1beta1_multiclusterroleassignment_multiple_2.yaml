@@ -7,7 +7,6 @@ spec:
   subject:
     kind: User
     name: test-user-multiple-2
-    apiGroup: rbac.authorization.k8s.io
   roleAssignments:
   - name: admin-assignment-cluster-1
     clusterRole: admin
