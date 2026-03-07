@@ -280,8 +280,11 @@ spec:
                               Placement resource
                             properties:
                               name:
-                                description: Name of the Placement resource
+                                description: Name of the Placement resource. Must
+                                  be a valid Kubernetes resource name (DNS subdomain).
+                                maxLength: 253
                                 minLength: 1
+                                pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
                                 type: string
                               namespace:
                                 description: Namespace of the Placement resource
