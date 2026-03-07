@@ -180,28 +180,61 @@ var _ = Describe("CRD Validation", Ordered, func() {
 })
 
 // buildMRAYAML creates a temporary MRA YAML file with customizable field values. Nil pointers use default values.
-func buildMRAYAML(clusterRole, placementName, placementNamespace *string, targetNamespaces []string) string {
-	cr := "test-role"
+func buildMRAYAML(
+	clusterRole, placementName, placementNamespace, subjectAPIGroup, subjectKind, subjectName, subjectNamespace *string,
+	targetNamespaces []string) string {
+
+	setClusterRole := "test-role"
 	if clusterRole != nil {
-		cr = *clusterRole
+		setClusterRole = *clusterRole
 	}
 
-	pn := "test-placement"
+	setPlacementName := "test-placement"
 	if placementName != nil {
-		pn = *placementName
+		setPlacementName = *placementName
 	}
 
-	pns := "test-placement-ns"
+	setPlacementNamespace := "test-placement-ns"
 	if placementNamespace != nil {
-		pns = *placementNamespace
+		setPlacementNamespace = *placementNamespace
 	}
 
-	nsSection := ""
+	setSubjectApiGroup := ""
+	if subjectAPIGroup != nil {
+		setSubjectApiGroup = *subjectAPIGroup
+	}
+
+	setSubjectKind := "User"
+	if subjectKind != nil {
+		setSubjectKind = *subjectKind
+	}
+
+	setSubjectName := "test-user"
+	if subjectName != nil {
+		setSubjectName = *subjectName
+	}
+
+	setSubjectNamespace := ""
+	if subjectNamespace != nil {
+		setSubjectNamespace = *subjectNamespace
+	}
+
+	targetNamespacesSection := ""
 	if len(targetNamespaces) > 0 {
-		nsSection = "\n      targetNamespaces:"
+		targetNamespacesSection = "\n      targetNamespaces:"
 		for _, ns := range targetNamespaces {
-			nsSection += fmt.Sprintf("\n        - \"%s\"", ns)
+			targetNamespacesSection += fmt.Sprintf("\n        - \"%s\"", ns)
 		}
+	}
+
+	subjectAPIGroupSection := ""
+	if setSubjectApiGroup != "" {
+		subjectAPIGroupSection = fmt.Sprintf("\n    apiGroup: \"%s\"", setSubjectApiGroup)
+	}
+
+	subjectNamespaceSection := ""
+	if setSubjectNamespace != "" {
+		subjectNamespaceSection = fmt.Sprintf("\n    namespace: \"%s\"", setSubjectNamespace)
 	}
 
 	content := fmt.Sprintf(`apiVersion: rbac.open-cluster-management.io/v1beta1
@@ -210,9 +243,9 @@ metadata:
   name: crd-validation-test
   namespace: default
 spec:
-  subject:
-    kind: User
-    name: test-user
+  subject:%s
+    kind: "%s"
+    name: "%s"%s
   roleAssignments:
     - name: test-assignment
       clusterRole: "%s"%s
@@ -221,7 +254,8 @@ spec:
         placements:
           - name: "%s"
             namespace: "%s"
-`, cr, nsSection, pn, pns)
+`, subjectAPIGroupSection, setSubjectKind, setSubjectName, subjectNamespaceSection, setClusterRole, targetNamespacesSection,
+		setPlacementName, setPlacementNamespace)
 
 	tmpFile, err := os.CreateTemp("", "mra-validation-*.yaml")
 	Expect(err).NotTo(HaveOccurred())
@@ -237,22 +271,22 @@ spec:
 
 // createTestMRAWithClusterRole creates a test MRA with a specific clusterRole value.
 func createTestMRAWithClusterRole(clusterRoleName string) string {
-	return buildMRAYAML(&clusterRoleName, nil, nil, nil)
+	return buildMRAYAML(&clusterRoleName, nil, nil, nil, nil, nil, nil, nil)
 }
 
 // createTestMRAWithTargetNamespace creates a test MRA with specific targetNamespaces values.
 func createTestMRAWithTargetNamespace(targetNamespaces ...string) string {
-	return buildMRAYAML(nil, nil, nil, targetNamespaces)
+	return buildMRAYAML(nil, nil, nil, nil, nil, nil, nil, targetNamespaces)
 }
 
 // createTestMRAWithPlacementName creates a test MRA with a specific placement name.
 func createTestMRAWithPlacementName(placementName string) string {
-	return buildMRAYAML(nil, &placementName, nil, nil)
+	return buildMRAYAML(nil, &placementName, nil, nil, nil, nil, nil, nil)
 }
 
 // createTestMRAWithPlacementNamespace creates a test MRA with a specific placement namespace.
 func createTestMRAWithPlacementNamespace(placementNamespace string) string {
-	return buildMRAYAML(nil, nil, &placementNamespace, nil)
+	return buildMRAYAML(nil, nil, &placementNamespace, nil, nil, nil, nil, nil)
 }
 
 // expectMRAApplyToFail applies MRA YAML via kubectl and expects it to fail with a validation error.
