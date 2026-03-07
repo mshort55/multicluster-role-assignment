@@ -71,7 +71,7 @@ type RoleAssignment struct {
 	ClusterRole string `json:"clusterRole"`
 
 	// TargetNamespaces defines what namespaces the role should be applied in for all selected clusters in the role
-	// assignment. If TargetNamespaces is not present, the role will be applied to all clusters' namespaces. Each 
+	// assignment. If TargetNamespaces is not present, the role will be applied to all clusters' namespaces. Each
 	// namespace must be a valid Kubernetes namespace name (DNS label).
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:items:MinLength=1

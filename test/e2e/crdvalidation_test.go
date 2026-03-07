@@ -40,7 +40,7 @@ var _ = Describe("CRD Validation", Ordered, func() {
 	Context("spec.roleAssignments[].clusterRole validation", func() {
 		DescribeTable("standard validation cases",
 			func(roleName string, shouldSucceed bool) {
-				yamlPath := createTestMRAYAML(roleName)
+				yamlPath := createTestMRAWithClusterRole(roleName)
 				defer os.Remove(yamlPath)
 
 				if shouldSucceed {
@@ -76,28 +76,87 @@ var _ = Describe("CRD Validation", Ordered, func() {
 			Entry("should reject names exceeding 253 characters", strings.Repeat("a", 254), false),
 		)
 	})
+
+	Context("spec.roleAssignments[].targetNamespaces validation", func() {
+		DescribeTable("standard validation cases",
+			func(namespaces []string, shouldSucceed bool) {
+				yamlPath := createTestMRAWithTargetNamespace(namespaces...)
+				defer os.Remove(yamlPath)
+
+				if shouldSucceed {
+					expectMRAApplyToSucceed(yamlPath)
+				} else {
+					expectMRAApplyToFail(yamlPath)
+				}
+			},
+			// Valid cases
+			Entry("should accept lowercase alphanumeric names", []string{"default"}, true),
+			Entry("should accept names with hyphens", []string{"my-namespace"}, true),
+			Entry("should accept names with numbers", []string{"namespace-123"}, true),
+			Entry("should accept single character names", []string{"a"}, true),
+			Entry("should accept numbers at start and end", []string{"1ns2"}, true),
+			Entry("should accept mixed alphanumeric with hyphens", []string{"my-app-namespace-1"}, true),
+			Entry("should accept names up to 63 characters", []string{strings.Repeat("a", 63)}, true),
+			Entry("should accept multiple valid namespaces", []string{"default", "kube-system", "my-app-ns"}, true),
+
+			// Invalid cases
+			Entry("should reject names with uppercase characters", []string{"MyNamespace"}, false),
+			Entry("should reject names with underscores", []string{"my_namespace"}, false),
+			Entry("should reject names with dots", []string{"my.namespace"}, false),
+			Entry("should reject names starting with hyphen", []string{"-invalid"}, false),
+			Entry("should reject names ending with hyphen", []string{"invalid-"}, false),
+			Entry("should reject names with special characters", []string{"namespace@test"}, false),
+			Entry("should reject names with spaces", []string{"my namespace"}, false),
+			Entry("should reject empty names", []string{""}, false),
+			Entry("should reject names exceeding 63 characters", []string{strings.Repeat("a", 64)}, false),
+			Entry("should reject if any namespace in list is invalid", []string{"default", "Invalid-NS", "my-app-ns"}, false),
+		)
+	})
 })
 
-// createTestMRAYAML creates a temporary MRA YAML file with a specific clusterRole value.
-func createTestMRAYAML(clusterRoleName string) string {
+// buildMRAYAML creates a temporary MRA YAML file with customizable field values. Nil pointers use default values.
+func buildMRAYAML(clusterRole, placementName, placementNamespace *string, targetNamespaces []string) string {
+	cr := "test-role"
+	if clusterRole != nil {
+		cr = *clusterRole
+	}
+
+	pn := "test-placement"
+	if placementName != nil {
+		pn = *placementName
+	}
+
+	pns := "test-placement-ns"
+	if placementNamespace != nil {
+		pns = *placementNamespace
+	}
+
+	nsSection := ""
+	if len(targetNamespaces) > 0 {
+		nsSection = "\n      targetNamespaces:"
+		for _, ns := range targetNamespaces {
+			nsSection += fmt.Sprintf("\n        - %s", ns)
+		}
+	}
+
 	content := fmt.Sprintf(`apiVersion: rbac.open-cluster-management.io/v1beta1
 kind: MulticlusterRoleAssignment
 metadata:
   name: crd-validation-test
-  namespace: %s
+  namespace: default
 spec:
   subject:
     kind: User
     name: test-user
   roleAssignments:
     - name: test-assignment
-      clusterRole: %s
+      clusterRole: %s%s
       clusterSelection:
         type: placements
         placements:
-          - name: test-placement
+          - name: %s
             namespace: %s
-`, openClusterManagementGlobalSetNamespace, clusterRoleName, openClusterManagementGlobalSetNamespace)
+`, cr, nsSection, pn, pns)
 
 	tmpFile, err := os.CreateTemp("", "mra-validation-*.yaml")
 	Expect(err).NotTo(HaveOccurred())
@@ -109,6 +168,26 @@ spec:
 	Expect(err).NotTo(HaveOccurred())
 
 	return tmpFile.Name()
+}
+
+// createTestMRAWithClusterRole creates a test MRA with a specific clusterRole value.
+func createTestMRAWithClusterRole(clusterRoleName string) string {
+	return buildMRAYAML(&clusterRoleName, nil, nil, nil)
+}
+
+// createTestMRAWithTargetNamespace creates a test MRA with specific targetNamespaces values.
+func createTestMRAWithTargetNamespace(targetNamespaces ...string) string {
+	return buildMRAYAML(nil, nil, nil, targetNamespaces)
+}
+
+// createTestMRAWithPlacementName creates a test MRA with a specific placement name.
+func createTestMRAWithPlacementName(placementName string) string {
+	return buildMRAYAML(nil, &placementName, nil, nil)
+}
+
+// createTestMRAWithPlacementNamespace creates a test MRA with a specific placement namespace.
+func createTestMRAWithPlacementNamespace(placementNamespace string) string {
+	return buildMRAYAML(nil, nil, &placementNamespace, nil)
 }
 
 // expectMRAApplyToFail applies MRA YAML via kubectl and expects it to fail with a validation error.
@@ -128,7 +207,6 @@ func expectMRAApplyToSucceed(yamlPath string) {
 
 // cleanupCRDValidationTestMRA deletes the test MulticlusterRoleAssignment if it exists.
 func cleanupCRDValidationTestMRA() {
-	cmd := exec.Command("kubectl", "delete", "multiclusterroleassignment", "crd-validation-test", "-n",
-		openClusterManagementGlobalSetNamespace, "--ignore-not-found=true")
+	cmd := exec.Command("kubectl", "delete", "multiclusterroleassignment", "crd-validation-test", "--ignore-not-found=true")
 	_, _ = utils.Run(cmd)
 }
