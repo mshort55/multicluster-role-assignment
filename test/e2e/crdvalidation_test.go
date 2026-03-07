@@ -177,6 +177,31 @@ var _ = Describe("CRD Validation", Ordered, func() {
 			Entry("should reject names exceeding 63 characters", strings.Repeat("a", 64), false),
 		)
 	})
+
+	Context("spec.subject.apiGroup validation", func() {
+		DescribeTable("standard validation cases",
+			func(apiGroup string, shouldSucceed bool) {
+				yamlPath := createTestMRAWithSubjectAPIGroup(apiGroup)
+				defer os.Remove(yamlPath)
+
+				if shouldSucceed {
+					expectMRAApplyToSucceed(yamlPath)
+				} else {
+					expectMRAApplyToFail(yamlPath)
+				}
+			},
+			// Valid cases
+			Entry("should accept empty string (default)", "", true),
+			Entry("should accept rbac.authorization.k8s.io", "rbac.authorization.k8s.io", true),
+
+			// Invalid cases
+			Entry("should reject apps", "apps", false),
+			Entry("should reject invalid.group", "invalid.group", false),
+			Entry("should reject core", "core", false),
+			Entry("should reject authorization.k8s.io", "authorization.k8s.io", false),
+			Entry("should reject random strings", "foo-bar", false),
+		)
+	})
 })
 
 // buildMRAYAML creates a temporary MRA YAML file with customizable field values. Nil pointers use default values.
