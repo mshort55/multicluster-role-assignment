@@ -202,6 +202,31 @@ var _ = Describe("CRD Validation", Ordered, func() {
 			Entry("should reject random strings", "foo-bar", false),
 		)
 	})
+
+	Context("spec.subject.kind validation", func() {
+		DescribeTable("standard validation cases",
+			func(kind string, shouldSucceed bool) {
+				yamlPath := createTestMRAWithSubjectKind(kind)
+				defer os.Remove(yamlPath)
+
+				if shouldSucceed {
+					expectMRAApplyToSucceed(yamlPath)
+				} else {
+					expectMRAApplyToFail(yamlPath)
+				}
+			},
+			// Valid cases
+			Entry("should accept User", "User", true),
+			Entry("should accept Group", "Group", true),
+
+			// Invalid cases
+			Entry("should reject ServiceAccount", "ServiceAccount", false),
+			Entry("should reject lowercase user", "user", false),
+			Entry("should reject lowercase group", "group", false),
+			Entry("should reject empty string", "", false),
+			Entry("should reject random strings", "RandomKind", false),
+		)
+	})
 })
 
 // buildMRAYAML creates a temporary MRA YAML file with customizable field values. Nil pointers use default values.
