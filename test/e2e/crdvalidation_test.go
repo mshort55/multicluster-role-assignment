@@ -227,6 +227,28 @@ var _ = Describe("CRD Validation", Ordered, func() {
 			Entry("should reject random strings", "RandomKind", false),
 		)
 	})
+
+	Context("spec.subject.namespace validation", func() {
+		DescribeTable("standard validation cases",
+			func(kind, namespace string, shouldSucceed bool) {
+				yamlPath := createTestMRAWithSubjectKindAndNamespace(kind, namespace)
+				defer os.Remove(yamlPath)
+
+				if shouldSucceed {
+					expectMRAApplyToSucceed(yamlPath)
+				} else {
+					expectMRAApplyToFail(yamlPath)
+				}
+			},
+			// Valid cases
+			Entry("should accept empty namespace with User kind", "User", "", true),
+			Entry("should accept empty namespace with Group kind", "Group", "", true),
+
+			// Invalid cases
+			Entry("should reject non-empty namespace with User kind", "User", "default", false),
+			Entry("should reject non-empty namespace with Group kind", "Group", "default", false),
+		)
+	})
 })
 
 // buildMRAYAML creates a temporary MRA YAML file with customizable field values. Nil pointers use default values.
@@ -347,11 +369,6 @@ func createTestMRAWithSubjectAPIGroup(subjectApiGroup string) string {
 // createTestMRAWithSubjectKind creates a test MRA with a specific subject.kind value.
 func createTestMRAWithSubjectKind(subjectKind string) string {
 	return buildMRAYAML(nil, nil, nil, nil, &subjectKind, nil, nil, nil)
-}
-
-// createTestMRAWithSubjectNamespace creates a test MRA with a specific subject.namespace value.
-func createTestMRAWithSubjectNamespace(subjectNamespace string) string {
-	return buildMRAYAML(nil, nil, nil, nil, nil, nil, &subjectNamespace, nil)
 }
 
 // createTestMRAWithSubjectKindAndNamespace creates a test MRA with specific subject.kind and subject.namespace values.
