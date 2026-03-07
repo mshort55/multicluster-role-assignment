@@ -152,6 +152,40 @@ var _ = Describe("CRD Validation", Ordered, func() {
 			Entry("should reject names exceeding 253 characters", strings.Repeat("a", 254), false),
 		)
 	})
+
+	Context("spec.roleAssignments[].clusterSelection.placements[].namespace validation", func() {
+		DescribeTable("standard validation cases",
+			func(placementNamespace string, shouldSucceed bool) {
+				yamlPath := createTestMRAWithPlacementNamespace(placementNamespace)
+				defer os.Remove(yamlPath)
+
+				if shouldSucceed {
+					expectMRAApplyToSucceed(yamlPath)
+				} else {
+					expectMRAApplyToFail(yamlPath)
+				}
+			},
+			// Valid cases
+			Entry("should accept lowercase alphanumeric names", "default", true),
+			Entry("should accept names with hyphens", "my-namespace", true),
+			Entry("should accept names with numbers", "namespace-123", true),
+			Entry("should accept single character names", "a", true),
+			Entry("should accept numbers at start and end", "1ns2", true),
+			Entry("should accept mixed alphanumeric with hyphens", "my-app-namespace-1", true),
+			Entry("should accept names up to 63 characters", strings.Repeat("a", 63), true),
+
+			// Invalid cases
+			Entry("should reject names with uppercase characters", "MyNamespace", false),
+			Entry("should reject names with underscores", "my_namespace", false),
+			Entry("should reject names with dots", "my.namespace", false),
+			Entry("should reject names starting with hyphen", "-invalid", false),
+			Entry("should reject names ending with hyphen", "invalid-", false),
+			Entry("should reject names with special characters", "namespace@test", false),
+			Entry("should reject names with spaces", "my namespace", false),
+			Entry("should reject empty names", "", false),
+			Entry("should reject names exceeding 63 characters", strings.Repeat("a", 64), false),
+		)
+	})
 })
 
 // buildMRAYAML creates a temporary MRA YAML file with customizable field values. Nil pointers use default values.
