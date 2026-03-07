@@ -50,29 +50,19 @@ var _ = Describe("CRD Validation", Ordered, func() {
 				}
 			},
 			// Valid cases
-			Entry("should accept lowercase alphanumeric names", "view", true),
+			Entry("should accept standard role names", "view", true),
 			Entry("should accept names with hyphens", "cluster-admin", true),
-			Entry("should accept names with dots (DNS subdomain)", "example.com", true),
-			Entry("should accept names with numbers", "role-123", true),
-			Entry("should accept single character names", "a", true),
-			Entry("should accept DNS subdomain with multiple segments", "subdomain.example.com", true),
-			Entry("should accept numbers at start and end", "1role2", true),
-			Entry("should accept mixed alphanumeric with dots and hyphens", "my-role.example-org.io", true),
+			Entry("should accept names with dots", "example.com", true),
+			Entry("should accept names with colons (system roles)", "system:admin", true),
+			Entry("should accept complex system role names", "system:controller:generic-garbage-collector", true),
+			Entry("should accept names with underscores", "my_role", true),
+			Entry("should accept names with @ symbols", "user@example.com", true),
+			Entry("should accept uppercase characters", "MyRole", true),
+			Entry("should accept mixed case and special chars", "System:ServiceAccount:Namespace:Name", true),
 			Entry("should accept names up to 253 characters", strings.Repeat("a", 253), true),
 
 			// Invalid cases
-			Entry("should reject names with uppercase characters", "MyRole", false),
-			Entry("should reject names with underscores", "my_role", false),
-			Entry("should reject names starting with hyphen", "-invalid", false),
-			Entry("should reject names ending with hyphen", "invalid-", false),
-			Entry("should reject names starting with dot", ".invalid", false),
-			Entry("should reject names ending with dot", "invalid.", false),
-			Entry("should reject names with special characters", "role@admin", false),
-			Entry("should reject names with spaces", "my role", false),
 			Entry("should reject empty names", "", false),
-			Entry("should reject names with consecutive dots", "example..com", false),
-			Entry("should reject names with hyphen after dot", "example.-com", false),
-			Entry("should reject names with slashes", "example.com/my-role", false),
 			Entry("should reject names exceeding 253 characters", strings.Repeat("a", 254), false),
 		)
 	})

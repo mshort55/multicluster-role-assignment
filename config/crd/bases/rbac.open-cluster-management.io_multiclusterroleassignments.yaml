@@ -263,10 +263,9 @@ spec:
                   properties:
                     clusterRole:
                       description: ClusterRole defines the cluster role name to be
-                        assigned. Must be a valid Kubernetes resource name (DNS subdomain).
+                        assigned.
                       maxLength: 253
                       minLength: 1
-                      pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
                       type: string
                     clusterSelection:
                       description: ClusterSelection defines the type of cluster selection
