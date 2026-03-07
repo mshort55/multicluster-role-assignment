@@ -160,6 +160,7 @@ var _ = Describe("CRD Validation", Ordered, func() {
 			Entry("should accept names with hyphens", "my-namespace", true),
 			Entry("should accept names with numbers", "namespace-123", true),
 			Entry("should accept single character names", "a", true),
+			Entry("should accept single number names", "1", true),
 			Entry("should accept numbers at start and end", "1ns2", true),
 			Entry("should accept mixed alphanumeric with hyphens", "my-app-namespace-1", true),
 			Entry("should accept names up to 63 characters", strings.Repeat("a", 63), true),
@@ -199,7 +200,7 @@ func buildMRAYAML(clusterRole, placementName, placementNamespace *string, target
 	if len(targetNamespaces) > 0 {
 		nsSection = "\n      targetNamespaces:"
 		for _, ns := range targetNamespaces {
-			nsSection += fmt.Sprintf("\n        - %s", ns)
+			nsSection += fmt.Sprintf("\n        - \"%s\"", ns)
 		}
 	}
 
@@ -214,12 +215,12 @@ spec:
     name: test-user
   roleAssignments:
     - name: test-assignment
-      clusterRole: %s%s
+      clusterRole: "%s"%s
       clusterSelection:
         type: placements
         placements:
-          - name: %s
-            namespace: %s
+          - name: "%s"
+            namespace: "%s"
 `, cr, nsSection, pn, pns)
 
 	tmpFile, err := os.CreateTemp("", "mra-validation-*.yaml")
