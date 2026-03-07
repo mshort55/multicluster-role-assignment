@@ -289,6 +289,26 @@ func createTestMRAWithPlacementNamespace(placementNamespace string) string {
 	return buildMRAYAML(nil, nil, &placementNamespace, nil, nil, nil, nil, nil)
 }
 
+// createTestMRAWithSubjectAPIGroup creates a test MRA with a specific subject.apiGroup value.
+func createTestMRAWithSubjectAPIGroup(subjectApiGroup string) string {
+	return buildMRAYAML(nil, nil, nil, &subjectApiGroup, nil, nil, nil, nil)
+}
+
+// createTestMRAWithSubjectKind creates a test MRA with a specific subject.kind value.
+func createTestMRAWithSubjectKind(subjectKind string) string {
+	return buildMRAYAML(nil, nil, nil, nil, &subjectKind, nil, nil, nil)
+}
+
+// createTestMRAWithSubjectNamespace creates a test MRA with a specific subject.namespace value.
+func createTestMRAWithSubjectNamespace(subjectNamespace string) string {
+	return buildMRAYAML(nil, nil, nil, nil, nil, nil, &subjectNamespace, nil)
+}
+
+// createTestMRAWithSubjectKindAndNamespace creates a test MRA with specific subject.kind and subject.namespace values.
+func createTestMRAWithSubjectKindAndNamespace(subjectKind, subjectNamespace string) string {
+	return buildMRAYAML(nil, nil, nil, nil, &subjectKind, nil, &subjectNamespace, nil)
+}
+
 // expectMRAApplyToFail applies MRA YAML via kubectl and expects it to fail with a validation error.
 func expectMRAApplyToFail(yamlPath string) {
 	cmd := exec.Command("kubectl", "apply", "-f", yamlPath)
