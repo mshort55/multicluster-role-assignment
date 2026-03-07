@@ -112,6 +112,46 @@ var _ = Describe("CRD Validation", Ordered, func() {
 			Entry("should reject if any namespace in list is invalid", []string{"default", "Invalid-NS", "my-app-ns"}, false),
 		)
 	})
+
+	Context("spec.roleAssignments[].clusterSelection.placements[].name validation", func() {
+		DescribeTable("standard validation cases",
+			func(placementName string, shouldSucceed bool) {
+				yamlPath := createTestMRAWithPlacementName(placementName)
+				defer os.Remove(yamlPath)
+
+				if shouldSucceed {
+					expectMRAApplyToSucceed(yamlPath)
+				} else {
+					expectMRAApplyToFail(yamlPath)
+				}
+			},
+			// Valid cases
+			Entry("should accept lowercase alphanumeric names", "placement1", true),
+			Entry("should accept names with hyphens", "my-placement", true),
+			Entry("should accept names with dots (DNS subdomain)", "example.com", true),
+			Entry("should accept names with numbers", "placement-123", true),
+			Entry("should accept single character names", "a", true),
+			Entry("should accept DNS subdomain with multiple segments", "subdomain.example.com", true),
+			Entry("should accept numbers at start and end", "1placement2", true),
+			Entry("should accept mixed alphanumeric with dots and hyphens", "my-placement.example-org.io", true),
+			Entry("should accept names up to 253 characters", strings.Repeat("a", 253), true),
+
+			// Invalid cases
+			Entry("should reject names with uppercase characters", "MyPlacement", false),
+			Entry("should reject names with underscores", "my_placement", false),
+			Entry("should reject names starting with hyphen", "-invalid", false),
+			Entry("should reject names ending with hyphen", "invalid-", false),
+			Entry("should reject names starting with dot", ".invalid", false),
+			Entry("should reject names ending with dot", "invalid.", false),
+			Entry("should reject names with special characters", "placement@test", false),
+			Entry("should reject names with spaces", "my placement", false),
+			Entry("should reject empty names", "", false),
+			Entry("should reject names with consecutive dots", "example..com", false),
+			Entry("should reject names with hyphen after dot", "example.-com", false),
+			Entry("should reject names with slashes", "example.com/my-placement", false),
+			Entry("should reject names exceeding 253 characters", strings.Repeat("a", 254), false),
+		)
+	})
 })
 
 // buildMRAYAML creates a temporary MRA YAML file with customizable field values. Nil pointers use default values.
