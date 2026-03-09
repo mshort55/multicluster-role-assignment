@@ -54,8 +54,12 @@ type Subject struct {
 	// +kubebuilder:validation:MinLength=1
 	Name string `json:"name"`
 
-	// Namespace of the referenced subject. Must be empty for "User" or "Group" kinds. Must be set for "ServiceAccount" kind.
+	// Namespace of the referenced subject. Must be empty for "User" or "Group" kinds. Must be set for "ServiceAccount"
+	// kind. Must be a valid Kubernetes namespace name (DNS label).
 	// +optional
+	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:MaxLength=63
+	// +kubebuilder:validation:Pattern=`^[a-z0-9]([-a-z0-9]*[a-z0-9])?$`
 	Namespace string `json:"namespace,omitempty"`
 }
 

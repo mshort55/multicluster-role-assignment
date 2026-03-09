@@ -244,12 +244,28 @@ var _ = Describe("CRD Validation", Ordered, func() {
 				noAPIGroup, serviceAccountKind, "test-sa", "test-ns", true),
 			Entry("should accept the default ServiceAccount",
 				noAPIGroup, serviceAccountKind, "default", "default", true),
+			Entry("should accept ServiceAccount with single character namespace",
+				noAPIGroup, serviceAccountKind, "test-sa", "a", true),
+			Entry("should accept ServiceAccount with hyphenated namespace",
+				noAPIGroup, serviceAccountKind, "test-sa", "my-namespace", true),
 
 			// Invalid cases
 			Entry("should reject ServiceAccount with non-empty apiGroup",
 				rbacAPIGroup, serviceAccountKind, "test-sa", "default", false),
 			Entry("should reject ServiceAccount with empty namespace",
 				noAPIGroup, serviceAccountKind, "test-sa", noNamespace, false),
+			Entry("should reject ServiceAccount namespace with dots",
+				noAPIGroup, serviceAccountKind, "test-sa", "my.namespace", false),
+			Entry("should reject ServiceAccount namespace with uppercase",
+				noAPIGroup, serviceAccountKind, "test-sa", "MyNamespace", false),
+			Entry("should reject ServiceAccount namespace starting with hyphen",
+				noAPIGroup, serviceAccountKind, "test-sa", "-invalid", false),
+			Entry("should reject ServiceAccount namespace ending with hyphen",
+				noAPIGroup, serviceAccountKind, "test-sa", "invalid-", false),
+			Entry("should reject ServiceAccount namespace with special characters",
+				noAPIGroup, serviceAccountKind, "test-sa", "namespace@test", false),
+			Entry("should reject ServiceAccount namespace exceeding 63 characters",
+				noAPIGroup, serviceAccountKind, "test-sa", strings.Repeat("a", 64), false),
 
 			//// Other
 			// Invalid cases
