@@ -367,7 +367,8 @@ spec:
                   rule: '!(self.kind in [''User'', ''Group'']) || (!has(self.namespace)
                     || size(self.namespace) == 0)'
                 - message: Subject apiGroup must be empty for ServiceAccount kind
-                  rule: self.kind != 'ServiceAccount' || size(self.apiGroup) == 0
+                  rule: self.kind != 'ServiceAccount' || !has(self.apiGroup) || size(self.apiGroup)
+                    == 0
                 - message: A namespace is required when subject kind is ServiceAccount
                   rule: self.kind != 'ServiceAccount' || (has(self.namespace) && size(self.namespace)
                     > 0)

@@ -182,10 +182,10 @@ var _ = Describe("CRD Validation", Ordered, func() {
 		)
 	})
 
-	Context("spec.subject.apiGroup validation", func() {
+	Context("spec.subject validation", func() {
 		DescribeTable("validation cases",
-			func(apiGroup string, shouldSucceed bool) {
-				yamlPath := createTestMRAWithSubjectAPIGroup(apiGroup)
+			func(apiGroup, kind, name, namespace string, shouldSucceed bool) {
+				yamlPath := createTestMRAWithSubject(apiGroup, kind, name, namespace)
 				defer os.Remove(yamlPath)
 
 				if shouldSucceed {
@@ -194,63 +194,39 @@ var _ = Describe("CRD Validation", Ordered, func() {
 					expectMRAApplyToFail(yamlPath)
 				}
 			},
-			// Valid cases
-			Entry("should accept empty string (default)", "", true),
-			Entry("should accept rbac.authorization.k8s.io", "rbac.authorization.k8s.io", true),
+			// Valid cases - User kind
+			Entry("should accept User with empty apiGroup", "", "User", "test-user", "", true),
+			Entry("should accept User with rbac.authorization.k8s.io apiGroup", "rbac.authorization.k8s.io", "User", "test-user", "", true),
+			Entry("should accept email-style user names", "rbac.authorization.k8s.io", "User", "admin@example.com", "", true),
 
-			// Invalid cases
-			Entry("should reject apps", "apps", false),
-			Entry("should reject invalid.group", "invalid.group", false),
-			Entry("should reject core", "core", false),
-			Entry("should reject authorization.k8s.io", "authorization.k8s.io", false),
-			Entry("should reject random strings", "foo-bar", false),
-		)
-	})
+			// Valid cases - Group kind
+			Entry("should accept Group with empty apiGroup", "", "Group", "test-group", "", true),
+			Entry("should accept Group with rbac.authorization.k8s.io apiGroup", "rbac.authorization.k8s.io", "Group", "test-group", "", true),
+			Entry("should accept uppercase characters in Group names", "", "Group", "TestGroup", "", true),
 
-	Context("spec.subject.kind validation", func() {
-		DescribeTable("validation cases",
-			func(kind string, shouldSucceed bool) {
-				yamlPath := createTestMRAWithSubjectKind(kind)
-				defer os.Remove(yamlPath)
+			// Valid cases - ServiceAccount kind
+			Entry("should accept ServiceAccount with empty apiGroup and namespace", "", "ServiceAccount", "test-sa", "default", true),
+			Entry("should accept ServiceAccount with different namespace", "", "ServiceAccount", "test-sa", "kube-system", true),
+			Entry("should accept the default ServiceAccount", "", "ServiceAccount", "default", "default", true),
 
-				if shouldSucceed {
-					expectMRAApplyToSucceed(yamlPath)
-				} else {
-					expectMRAApplyToFail(yamlPath)
-				}
-			},
-			// Valid cases
-			Entry("should accept User", "User", true),
-			Entry("should accept Group", "Group", true),
+			// Invalid cases - apiGroup validation
+			Entry("should reject User with invalid apiGroup", "apps", "User", "test-user", "", false),
+			Entry("should reject User with invalid.group apiGroup", "invalid.group", "User", "test-user", "", false),
+			Entry("should reject User with core apiGroup", "core", "User", "test-user", "", false),
+			Entry("should reject User with authorization.k8s.io apiGroup", "authorization.k8s.io", "User", "test-user", "", false),
+			Entry("should reject User with random apiGroup", "foo-bar", "User", "test-user", "", false),
+			Entry("should reject ServiceAccount with non-empty apiGroup", "rbac.authorization.k8s.io", "ServiceAccount", "test-sa", "default", false),
 
-			// Invalid cases
-			Entry("should reject ServiceAccount", "ServiceAccount", false),
-			Entry("should reject lowercase user", "user", false),
-			Entry("should reject lowercase group", "group", false),
-			Entry("should reject empty string", "", false),
-			Entry("should reject random strings", "RandomKind", false),
-		)
-	})
+			// Invalid cases - kind validation
+			Entry("should reject lowercase user kind", "", "user", "test-user", "", false),
+			Entry("should reject lowercase group kind", "", "group", "test-group", "", false),
+			Entry("should reject empty kind", "", "", "test-name", "", false),
+			Entry("should reject random kind", "", "RandomKind", "test-name", "", false),
 
-	Context("spec.subject.namespace validation", func() {
-		DescribeTable("validation cases",
-			func(kind, namespace string, shouldSucceed bool) {
-				yamlPath := createTestMRAWithSubjectKindAndNamespace(kind, namespace)
-				defer os.Remove(yamlPath)
-
-				if shouldSucceed {
-					expectMRAApplyToSucceed(yamlPath)
-				} else {
-					expectMRAApplyToFail(yamlPath)
-				}
-			},
-			// Valid cases
-			Entry("should accept empty namespace with User kind", "User", "", true),
-			Entry("should accept empty namespace with Group kind", "Group", "", true),
-
-			// Invalid cases
-			Entry("should reject non-empty namespace with User kind", "User", "default", false),
-			Entry("should reject non-empty namespace with Group kind", "Group", "default", false),
+			// Invalid cases - namespace validation
+			Entry("should reject User with non-empty namespace", "", "User", "test-user", "default", false),
+			Entry("should reject Group with non-empty namespace", "", "Group", "test-group", "default", false),
+			Entry("should reject ServiceAccount with empty namespace", "", "ServiceAccount", "test-sa", "", false),
 		)
 	})
 })
@@ -365,19 +341,9 @@ func createTestMRAWithPlacementNamespace(placementNamespace string) string {
 	return buildMRAYAML(nil, nil, &placementNamespace, nil, nil, nil, nil, nil)
 }
 
-// createTestMRAWithSubjectAPIGroup creates a test MRA with a specific subject.apiGroup value.
-func createTestMRAWithSubjectAPIGroup(subjectApiGroup string) string {
-	return buildMRAYAML(nil, nil, nil, &subjectApiGroup, nil, nil, nil, nil)
-}
-
-// createTestMRAWithSubjectKind creates a test MRA with a specific subject.kind value.
-func createTestMRAWithSubjectKind(subjectKind string) string {
-	return buildMRAYAML(nil, nil, nil, nil, &subjectKind, nil, nil, nil)
-}
-
-// createTestMRAWithSubjectKindAndNamespace creates a test MRA with specific subject.kind and subject.namespace values.
-func createTestMRAWithSubjectKindAndNamespace(subjectKind, subjectNamespace string) string {
-	return buildMRAYAML(nil, nil, nil, nil, &subjectKind, nil, &subjectNamespace, nil)
+// createTestMRAWithSubject creates a test MRA with specific subject field values.
+func createTestMRAWithSubject(apiGroup, kind, name, namespace string) string {
+	return buildMRAYAML(nil, nil, nil, &apiGroup, &kind, &name, &namespace, nil)
 }
 
 // expectMRAApplyToFail applies MRA YAML via kubectl and expects it to fail with a validation error.

@@ -36,7 +36,7 @@ type MulticlusterRoleAssignmentSpec struct {
 
 // Subject defines the user, group, or service account for role assignments.
 // +kubebuilder:validation:XValidation:rule="!(self.kind in ['User', 'Group']) || (!has(self.namespace) || size(self.namespace) == 0)",message="Subject namespace must be empty for User and Group kinds"
-// +kubebuilder:validation:XValidation:rule="self.kind != 'ServiceAccount' || size(self.apiGroup) == 0",message="Subject apiGroup must be empty for ServiceAccount kind"
+// +kubebuilder:validation:XValidation:rule="self.kind != 'ServiceAccount' || !has(self.apiGroup) || size(self.apiGroup) == 0",message="Subject apiGroup must be empty for ServiceAccount kind"
 // +kubebuilder:validation:XValidation:rule="self.kind != 'ServiceAccount' || (has(self.namespace) && size(self.namespace) > 0)",message="A namespace is required when subject kind is ServiceAccount"
 type Subject struct {
 	// API group of the referenced subject.
