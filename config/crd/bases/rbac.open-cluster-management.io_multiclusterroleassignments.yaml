@@ -351,6 +351,7 @@ spec:
                     type: string
                   name:
                     description: Name of the subject.
+                    minLength: 1
                     type: string
                   namespace:
                     description: Namespace of the referenced subject. Must be empty

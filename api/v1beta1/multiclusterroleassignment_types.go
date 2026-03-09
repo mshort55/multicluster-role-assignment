@@ -51,6 +51,7 @@ type Subject struct {
 
 	// Name of the subject.
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
 	Name string `json:"name"`
 
 	// Namespace of the referenced subject. Must be empty for "User" or "Group" kinds. Must be set for "ServiceAccount" kind.
