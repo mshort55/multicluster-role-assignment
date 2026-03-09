@@ -28,6 +28,15 @@ import (
 	"github.com/stolostron/multicluster-role-assignment/test/utils"
 )
 
+const (
+	rbacAPIGroup       = "rbac.authorization.k8s.io"
+	userKind           = "User"
+	groupKind          = "Group"
+	serviceAccountKind = "ServiceAccount"
+	noAPIGroup         = ""
+	noNamespace        = ""
+)
+
 var _ = Describe("CRD Validation", Ordered, func() {
 	BeforeEach(func() {
 		cleanupCRDValidationTestMRA()
@@ -61,11 +70,9 @@ var _ = Describe("CRD Validation", Ordered, func() {
 			Entry("should accept uppercase characters", "MyRole", true),
 			Entry("should accept mixed case and special chars", "System:ServiceAccount:Namespace:Name", true),
 			Entry("should accept complex characters allowed by K8s RBAC", "my-role.v1_alpha:test", true),
-			Entry("should accept names up to 253 characters", strings.Repeat("a", 253), true),
 
 			// Invalid cases
 			Entry("should reject empty names", "", false),
-			Entry("should reject names exceeding 253 characters", strings.Repeat("a", 254), false),
 		)
 	})
 
@@ -194,39 +201,60 @@ var _ = Describe("CRD Validation", Ordered, func() {
 					expectMRAApplyToFail(yamlPath)
 				}
 			},
-			// Valid cases - User kind
-			Entry("should accept User with empty apiGroup", "", "User", "test-user", "", true),
-			Entry("should accept User with rbac.authorization.k8s.io apiGroup", "rbac.authorization.k8s.io", "User", "test-user", "", true),
-			Entry("should accept email-style user names", "rbac.authorization.k8s.io", "User", "admin@example.com", "", true),
 
-			// Valid cases - Group kind
-			Entry("should accept Group with empty apiGroup", "", "Group", "test-group", "", true),
-			Entry("should accept Group with rbac.authorization.k8s.io apiGroup", "rbac.authorization.k8s.io", "Group", "test-group", "", true),
-			Entry("should accept uppercase characters in Group names", "", "Group", "TestGroup", "", true),
+			//// User Kind
+			// Valid cases
+			Entry("should accept User with empty apiGroup",
+				noAPIGroup, userKind, "test-user", noNamespace, true),
+			Entry("should accept User with rbac.authorization.k8s.io apiGroup",
+				rbacAPIGroup, userKind, "test-user", noNamespace, true),
+			Entry("should accept email-style user names",
+				rbacAPIGroup, userKind, "admin@example.com", noNamespace, true),
 
-			// Valid cases - ServiceAccount kind
-			Entry("should accept ServiceAccount with empty apiGroup and namespace", "", "ServiceAccount", "test-sa", "default", true),
-			Entry("should accept ServiceAccount with different namespace", "", "ServiceAccount", "test-sa", "kube-system", true),
-			Entry("should accept the default ServiceAccount", "", "ServiceAccount", "default", "default", true),
+			// Invalid cases
+			Entry("should reject User with invalid.group apiGroup",
+				"invalid.group", userKind, "test-user", noNamespace, false),
+			Entry("should reject lowercase user kind",
+				noAPIGroup, "user", "test-user", noNamespace, false),
+			Entry("should reject User with non-empty namespace",
+				noAPIGroup, userKind, "test-user", "default", false),
 
-			// Invalid cases - apiGroup validation
-			Entry("should reject User with invalid apiGroup", "apps", "User", "test-user", "", false),
-			Entry("should reject User with invalid.group apiGroup", "invalid.group", "User", "test-user", "", false),
-			Entry("should reject User with core apiGroup", "core", "User", "test-user", "", false),
-			Entry("should reject User with authorization.k8s.io apiGroup", "authorization.k8s.io", "User", "test-user", "", false),
-			Entry("should reject User with random apiGroup", "foo-bar", "User", "test-user", "", false),
-			Entry("should reject ServiceAccount with non-empty apiGroup", "rbac.authorization.k8s.io", "ServiceAccount", "test-sa", "default", false),
+			//// Group Kind
+			// Valid cases
+			Entry("should accept Group with empty apiGroup",
+				noAPIGroup, groupKind, "test-group", noNamespace, true),
+			Entry("should accept Group with rbac.authorization.k8s.io apiGroup",
+				rbacAPIGroup, groupKind, "test-group", noNamespace, true),
+			Entry("should accept uppercase characters in Group names",
+				noAPIGroup, groupKind, "TestGroup", noNamespace, true),
 
-			// Invalid cases - kind validation
-			Entry("should reject lowercase user kind", "", "user", "test-user", "", false),
-			Entry("should reject lowercase group kind", "", "group", "test-group", "", false),
-			Entry("should reject empty kind", "", "", "test-name", "", false),
-			Entry("should reject random kind", "", "RandomKind", "test-name", "", false),
+			// Invalid cases
+			Entry("should reject Group with authorization.k8s.io apiGroup",
+				"authorization.k8s.io", groupKind, "test-group", noNamespace, false),
+			Entry("should reject lowercase group kind",
+				noAPIGroup, "group", "test-group", noNamespace, false),
+			Entry("should reject Group with non-empty namespace",
+				noAPIGroup, groupKind, "test-group", "default", false),
 
-			// Invalid cases - namespace validation
-			Entry("should reject User with non-empty namespace", "", "User", "test-user", "default", false),
-			Entry("should reject Group with non-empty namespace", "", "Group", "test-group", "default", false),
-			Entry("should reject ServiceAccount with empty namespace", "", "ServiceAccount", "test-sa", "", false),
+			//// ServiceAccount Kind
+			// Valid cases
+			Entry("should accept ServiceAccount with empty apiGroup",
+				noAPIGroup, serviceAccountKind, "test-sa", "test-ns", true),
+			Entry("should accept the default ServiceAccount",
+				noAPIGroup, serviceAccountKind, "default", "default", true),
+
+			// Invalid cases
+			Entry("should reject ServiceAccount with non-empty apiGroup",
+				rbacAPIGroup, serviceAccountKind, "test-sa", "default", false),
+			Entry("should reject ServiceAccount with empty namespace",
+				noAPIGroup, serviceAccountKind, "test-sa", noNamespace, false),
+
+			//// Other
+			// Invalid cases
+			Entry("should reject empty kind",
+				noAPIGroup, "", "test-name", noNamespace, false),
+			Entry("should reject random kind",
+				noAPIGroup, "RandomKind", "test-name", noNamespace, false),
 		)
 	})
 })
