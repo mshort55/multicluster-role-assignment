@@ -22,7 +22,7 @@ import (
 
 // MulticlusterRoleAssignmentSpec defines the desired state of MulticlusterRoleAssignment.
 type MulticlusterRoleAssignmentSpec struct {
-	// Subject defines the user or group for all role assignments.
+	// Subject defines the user, group, or service account for all role assignments.
 	// +kubebuilder:validation:Required
 	Subject Subject `json:"subject"`
 
@@ -34,24 +34,26 @@ type MulticlusterRoleAssignmentSpec struct {
 	RoleAssignments []RoleAssignment `json:"roleAssignments"`
 }
 
-// Subject defines the user or group for role assignments.
-// +kubebuilder:validation:XValidation:rule="!(self.kind in ['User', 'Group']) || !has(self.namespace) || size(self.namespace) == 0",message="namespace must be empty for User and Group kinds"
+// Subject defines the user, group, or service account for role assignments.
+// +kubebuilder:validation:XValidation:rule="!(self.kind in ['User', 'Group']) || (!has(self.namespace) || size(self.namespace) == 0)",message="Subject namespace must be empty for User and Group kinds"
+// +kubebuilder:validation:XValidation:rule="self.kind != 'ServiceAccount' || size(self.apiGroup) == 0",message="Subject apiGroup must be empty for ServiceAccount kind"
+// +kubebuilder:validation:XValidation:rule="self.kind != 'ServiceAccount' || (has(self.namespace) && size(self.namespace) > 0)",message="A namespace is required when subject kind is ServiceAccount"
 type Subject struct {
 	// API group of the referenced subject.
 	// +kubebuilder:validation:Enum="";rbac.authorization.k8s.io
 	// +optional
 	APIGroup string `json:"apiGroup,omitempty"`
 
-	// Kind of the subject. Accepted values are "User" and "Group".
+	// Kind of the subject. Accepted values are "User", "Group", and "ServiceAccount".
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Enum=User;Group
+	// +kubebuilder:validation:Enum=User;Group;ServiceAccount
 	Kind string `json:"kind"`
 
 	// Name of the subject.
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
 
-	// Namespace of the referenced subject. Must be empty for "User" or "Group" kinds.
+	// Namespace of the referenced subject. Must be empty for "User" or "Group" kinds. Must be set for "ServiceAccount" kind.
 	// +optional
 	Namespace string `json:"namespace,omitempty"`
 }
