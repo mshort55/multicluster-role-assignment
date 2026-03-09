@@ -333,7 +333,8 @@ spec:
                 - name
                 x-kubernetes-list-type: map
               subject:
-                description: Subject defines the user or group for all role assignments.
+                description: Subject defines the user, group, or service account for
+                  all role assignments.
                 properties:
                   apiGroup:
                     description: API group of the referenced subject.
@@ -342,27 +343,34 @@ spec:
                     - rbac.authorization.k8s.io
                     type: string
                   kind:
-                    description: Kind of the subject. Accepted values are "User" and
-                      "Group".
+                    description: Kind of the subject. Accepted values are "User",
+                      "Group", and "ServiceAccount".
                     enum:
                     - User
                     - Group
+                    - ServiceAccount
                     type: string
                   name:
                     description: Name of the subject.
                     type: string
                   namespace:
                     description: Namespace of the referenced subject. Must be empty
-                      for "User" or "Group" kinds.
+                      for "User" or "Group" kinds. Must be set for "ServiceAccount"
+                      kind.
                     type: string
                 required:
                 - kind
                 - name
                 type: object
                 x-kubernetes-validations:
-                - message: namespace must be empty for User and Group kinds
-                  rule: '!(self.kind in [''User'', ''Group'']) || !has(self.namespace)
-                    || size(self.namespace) == 0'
+                - message: Subject namespace must be empty for User and Group kinds
+                  rule: '!(self.kind in [''User'', ''Group'']) || (!has(self.namespace)
+                    || size(self.namespace) == 0)'
+                - message: Subject apiGroup must be empty for ServiceAccount kind
+                  rule: self.kind != 'ServiceAccount' || size(self.apiGroup) == 0
+                - message: A namespace is required when subject kind is ServiceAccount
+                  rule: self.kind != 'ServiceAccount' || (has(self.namespace) && size(self.namespace)
+                    > 0)
             required:
             - roleAssignments
             - subject
