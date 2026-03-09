@@ -57,7 +57,6 @@ spec:
   subject:
     kind: User
     name: jane.developer
-    apiGroup: rbac.authorization.k8s.io
   roleAssignments:
   - name: view-access
     clusterRole: view
@@ -133,7 +132,6 @@ spec:
   subject:
     kind: User
     name: admin-user
-    apiGroup: rbac.authorization.k8s.io
   roleAssignments:
   - name: prod-admin
     clusterRole: admin
