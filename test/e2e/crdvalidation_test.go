@@ -38,7 +38,7 @@ var _ = Describe("CRD Validation", Ordered, func() {
 	})
 
 	Context("spec.roleAssignments[].clusterRole validation", func() {
-		DescribeTable("standard validation cases",
+		DescribeTable("validation cases",
 			func(roleName string, shouldSucceed bool) {
 				yamlPath := createTestMRAWithClusterRole(roleName)
 				defer os.Remove(yamlPath)
@@ -68,7 +68,7 @@ var _ = Describe("CRD Validation", Ordered, func() {
 	})
 
 	Context("spec.roleAssignments[].targetNamespaces validation", func() {
-		DescribeTable("standard validation cases",
+		DescribeTable("validation cases",
 			func(namespaces []string, shouldSucceed bool) {
 				yamlPath := createTestMRAWithTargetNamespace(namespaces...)
 				defer os.Remove(yamlPath)
@@ -104,7 +104,7 @@ var _ = Describe("CRD Validation", Ordered, func() {
 	})
 
 	Context("spec.roleAssignments[].clusterSelection.placements[].name validation", func() {
-		DescribeTable("standard validation cases",
+		DescribeTable("validation cases",
 			func(placementName string, shouldSucceed bool) {
 				yamlPath := createTestMRAWithPlacementName(placementName)
 				defer os.Remove(yamlPath)
@@ -144,7 +144,7 @@ var _ = Describe("CRD Validation", Ordered, func() {
 	})
 
 	Context("spec.roleAssignments[].clusterSelection.placements[].namespace validation", func() {
-		DescribeTable("standard validation cases",
+		DescribeTable("validation cases",
 			func(placementNamespace string, shouldSucceed bool) {
 				yamlPath := createTestMRAWithPlacementNamespace(placementNamespace)
 				defer os.Remove(yamlPath)
@@ -179,7 +179,7 @@ var _ = Describe("CRD Validation", Ordered, func() {
 	})
 
 	Context("spec.subject.apiGroup validation", func() {
-		DescribeTable("standard validation cases",
+		DescribeTable("validation cases",
 			func(apiGroup string, shouldSucceed bool) {
 				yamlPath := createTestMRAWithSubjectAPIGroup(apiGroup)
 				defer os.Remove(yamlPath)
@@ -204,7 +204,7 @@ var _ = Describe("CRD Validation", Ordered, func() {
 	})
 
 	Context("spec.subject.kind validation", func() {
-		DescribeTable("standard validation cases",
+		DescribeTable("validation cases",
 			func(kind string, shouldSucceed bool) {
 				yamlPath := createTestMRAWithSubjectKind(kind)
 				defer os.Remove(yamlPath)
@@ -229,7 +229,7 @@ var _ = Describe("CRD Validation", Ordered, func() {
 	})
 
 	Context("spec.subject.namespace validation", func() {
-		DescribeTable("standard validation cases",
+		DescribeTable("validation cases",
 			func(kind, namespace string, shouldSucceed bool) {
 				yamlPath := createTestMRAWithSubjectKindAndNamespace(kind, namespace)
 				defer os.Remove(yamlPath)
