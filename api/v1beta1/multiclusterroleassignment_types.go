@@ -68,7 +68,6 @@ type RoleAssignment struct {
 	// ClusterRole defines the cluster role name to be assigned.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinLength=1
-	// +kubebuilder:validation:MaxLength=253
 	ClusterRole string `json:"clusterRole"`
 
 	// TargetNamespaces defines what namespaces the role should be applied in for all selected clusters in the role

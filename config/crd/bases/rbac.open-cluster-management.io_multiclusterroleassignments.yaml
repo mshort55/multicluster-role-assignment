@@ -264,7 +264,6 @@ spec:
                     clusterRole:
                       description: ClusterRole defines the cluster role name to be
                         assigned.
-                      maxLength: 253
                       minLength: 1
                       type: string
                     clusterSelection:
