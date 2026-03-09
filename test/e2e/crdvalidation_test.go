@@ -218,6 +218,8 @@ var _ = Describe("CRD Validation", Ordered, func() {
 				noAPIGroup, "user", "test-user", noNamespace, false),
 			Entry("should reject User with non-empty namespace",
 				noAPIGroup, userKind, "test-user", "default", false),
+			Entry("should reject empty string User name",
+				noAPIGroup, userKind, "", "default", false),
 
 			//// Group Kind
 			// Valid cases
