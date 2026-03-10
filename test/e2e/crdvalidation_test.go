@@ -50,7 +50,7 @@ var _ = Describe("CRD Validation", Ordered, func() {
 		DescribeTable("validation cases",
 			func(roleName string, shouldSucceed bool) {
 				yamlPath := createTestMRAWithClusterRole(roleName)
-				defer os.Remove(yamlPath)
+				defer func() { _ = os.Remove(yamlPath) }()
 
 				if shouldSucceed {
 					expectMRAApplyToSucceed(yamlPath)
@@ -80,7 +80,7 @@ var _ = Describe("CRD Validation", Ordered, func() {
 		DescribeTable("validation cases",
 			func(namespaces []string, shouldSucceed bool) {
 				yamlPath := createTestMRAWithTargetNamespace(namespaces...)
-				defer os.Remove(yamlPath)
+				defer func() { _ = os.Remove(yamlPath) }()
 
 				if shouldSucceed {
 					expectMRAApplyToSucceed(yamlPath)
@@ -117,7 +117,7 @@ var _ = Describe("CRD Validation", Ordered, func() {
 		DescribeTable("validation cases",
 			func(placementName string, shouldSucceed bool) {
 				yamlPath := createTestMRAWithPlacementName(placementName)
-				defer os.Remove(yamlPath)
+				defer func() { _ = os.Remove(yamlPath) }()
 
 				if shouldSucceed {
 					expectMRAApplyToSucceed(yamlPath)
@@ -157,7 +157,7 @@ var _ = Describe("CRD Validation", Ordered, func() {
 		DescribeTable("validation cases",
 			func(placementNamespace string, shouldSucceed bool) {
 				yamlPath := createTestMRAWithPlacementNamespace(placementNamespace)
-				defer os.Remove(yamlPath)
+				defer func() { _ = os.Remove(yamlPath) }()
 
 				if shouldSucceed {
 					expectMRAApplyToSucceed(yamlPath)
@@ -193,7 +193,7 @@ var _ = Describe("CRD Validation", Ordered, func() {
 		DescribeTable("validation cases",
 			func(apiGroup, kind, name, namespace string, shouldSucceed bool) {
 				yamlPath := createTestMRAWithSubject(apiGroup, kind, name, namespace)
-				defer os.Remove(yamlPath)
+				defer func() { _ = os.Remove(yamlPath) }()
 
 				if shouldSucceed {
 					expectMRAApplyToSucceed(yamlPath)
@@ -202,7 +202,7 @@ var _ = Describe("CRD Validation", Ordered, func() {
 				}
 			},
 
-			//// User Kind
+			// User Kind
 			// Valid cases
 			Entry("should accept User with empty apiGroup",
 				noAPIGroup, userKind, "test-user", noNamespace, true),
@@ -221,7 +221,7 @@ var _ = Describe("CRD Validation", Ordered, func() {
 			Entry("should reject empty string User name",
 				noAPIGroup, userKind, "", "default", false),
 
-			//// Group Kind
+			// Group Kind
 			// Valid cases
 			Entry("should accept Group with empty apiGroup",
 				noAPIGroup, groupKind, "test-group", noNamespace, true),
@@ -238,7 +238,7 @@ var _ = Describe("CRD Validation", Ordered, func() {
 			Entry("should reject Group with non-empty namespace",
 				noAPIGroup, groupKind, "test-group", "default", false),
 
-			//// ServiceAccount Kind
+			// ServiceAccount Kind
 			// Valid cases
 			Entry("should accept ServiceAccount with empty apiGroup",
 				noAPIGroup, serviceAccountKind, "test-sa", "test-ns", true),
@@ -267,7 +267,7 @@ var _ = Describe("CRD Validation", Ordered, func() {
 			Entry("should reject ServiceAccount namespace exceeding 63 characters",
 				noAPIGroup, serviceAccountKind, "test-sa", strings.Repeat("a", 64), false),
 
-			//// Other
+			// Other
 			// Invalid cases
 			Entry("should reject empty kind",
 				noAPIGroup, "", "test-name", noNamespace, false),
@@ -352,8 +352,8 @@ spec:
         placements:
           - name: "%s"
             namespace: "%s"
-`, subjectAPIGroupSection, setSubjectKind, setSubjectName, subjectNamespaceSection, setClusterRole, targetNamespacesSection,
-		setPlacementName, setPlacementNamespace)
+`, subjectAPIGroupSection, setSubjectKind, setSubjectName, subjectNamespaceSection, setClusterRole,
+		targetNamespacesSection, setPlacementName, setPlacementNamespace)
 
 	tmpFile, err := os.CreateTemp("", "mra-validation-*.yaml")
 	Expect(err).NotTo(HaveOccurred())
@@ -409,6 +409,7 @@ func expectMRAApplyToSucceed(yamlPath string) {
 
 // cleanupCRDValidationTestMRA deletes the test MulticlusterRoleAssignment if it exists.
 func cleanupCRDValidationTestMRA() {
-	cmd := exec.Command("kubectl", "delete", "multiclusterroleassignment", "crd-validation-test", "--ignore-not-found=true")
+	cmd := exec.Command(
+		"kubectl", "delete", "multiclusterroleassignment", "crd-validation-test", "--ignore-not-found=true")
 	_, _ = utils.Run(cmd)
 }
