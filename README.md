@@ -85,8 +85,17 @@ The `MulticlusterRoleAssignment` custom resource defines role assignments across
 
 | Field | Type | Description | Required |
 |-------|------|-------------|----------|
-| `subject` | `rbacv1.Subject` | The user or group for the role assignment | Yes |
+| `subject` | `Subject` | The user, group, or service account for all role assignments | Yes |
 | `roleAssignments` | `[]RoleAssignment` | List of role assignments for different clusters | Yes |
+
+#### Subject Fields
+
+| Field | Type | Description | Required |
+|-------|------|-------------|----------|
+| `apiGroup` | `string` | API group of the subject. Must be empty or `rbac.authorization.k8s.io` for User/Group. Must be empty (or omitted) for ServiceAccount. | No |
+| `kind` | `string` | Kind of subject (User, Group, or ServiceAccount) | Yes |
+| `name` | `string` | Name of the subject | Yes |
+| `namespace` | `string` | Namespace of the subject. Must NOT be set for User/Group. Must be set for ServiceAccount. | No (except required for ServiceAccount) |
 
 #### RoleAssignment Fields
 
