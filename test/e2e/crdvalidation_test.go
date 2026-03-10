@@ -410,6 +410,7 @@ func expectMRAApplyToSucceed(yamlPath string) {
 // cleanupCRDValidationTestMRA deletes the test MulticlusterRoleAssignment if it exists.
 func cleanupCRDValidationTestMRA() {
 	cmd := exec.Command(
-		"kubectl", "delete", "multiclusterroleassignment", "crd-validation-test", "--ignore-not-found=true")
+		"kubectl", "delete", "multiclusterroleassignment", "-n", "default", "crd-validation-test",
+		"--ignore-not-found=true")
 	_, _ = utils.Run(cmd)
 }
