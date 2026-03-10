@@ -43,38 +43,6 @@ Creating `MulticlusterRoleAssignment` resources will create `ClusterPermission` 
    kubectl get pods -n multicluster-role-assignment-system
    ```
 
-### Basic Usage
-
-Create a `MulticlusterRoleAssignment` to grant a user view access to specific clusters:
-
-```yaml
-apiVersion: rbac.open-cluster-management.io/v1beta1
-kind: MulticlusterRoleAssignment
-metadata:
-  name: developer-view-access
-  namespace: open-cluster-management-global-set
-spec:
-  subject:
-    kind: User
-    name: jane.developer
-  roleAssignments:
-  - name: view-access
-    clusterRole: view
-    targetNamespaces:
-    - development
-    - staging
-    clusterSelection:
-      type: placements
-      placements:
-      - name: dev-clusters
-        namespace: open-cluster-management-global-set
-```
-
-This example:
-- Grants the user `jane.developer` the `view` cluster role
-- Applies the role to the `development` and `staging` namespaces
-- Targets clusters selected by the `dev-clusters` Placement resource
-
 ## API Reference
 
 ### MulticlusterRoleAssignment
@@ -129,6 +97,37 @@ The operator reports the status of each role assignment, including:
 
 ## Examples
 
+### Basic Usage
+
+```yaml
+apiVersion: rbac.open-cluster-management.io/v1beta1
+kind: MulticlusterRoleAssignment
+metadata:
+  name: developer-view-access
+  namespace: open-cluster-management-global-set
+spec:
+  subject:
+    kind: User
+    name: jane.developer
+    apiGroup: rbac.authorization.k8s.io
+  roleAssignments:
+  - name: view-access
+    clusterRole: view
+    targetNamespaces:
+    - development
+    - staging
+    clusterSelection:
+      type: placements
+      placements:
+      - name: dev-clusters
+        namespace: open-cluster-management-global-set
+```
+
+This example:
+- Grants the user `jane.developer` the `view` cluster role
+- Applies the role to the `development` and `staging` namespaces
+- Targets clusters selected by the `dev-clusters` Placement resource
+
 ### Multiple Role Assignments
 
 ```yaml
@@ -161,6 +160,36 @@ spec:
       - name: dev-clusters
         namespace: open-cluster-management-global-set
 ```
+
+This example shows how a single MulticlusterRoleAssignment can have many roleAssignments.
+
+### ServiceAccount Assignment
+
+```yaml
+apiVersion: rbac.open-cluster-management.io/v1beta1
+kind: MulticlusterRoleAssignment
+metadata:
+  name: automation-serviceaccount
+  namespace: open-cluster-management-global-set
+spec:
+  subject:
+    kind: ServiceAccount
+    name: automation-account
+    namespace: automation
+  roleAssignments:
+  - name: pod-reader
+    clusterRole: view
+    targetNamespaces:
+    - production
+    - staging
+    clusterSelection:
+      type: placements
+      placements:
+      - name: prod-clusters
+        namespace: open-cluster-management-global-set
+```
+
+This example grants a ServiceAccount access to view resources in specific namespaces across selected clusters.
 
 ## Development
 
