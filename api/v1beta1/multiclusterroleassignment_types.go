@@ -22,7 +22,7 @@ import (
 
 // MulticlusterRoleAssignmentSpec defines the desired state of MulticlusterRoleAssignment.
 type MulticlusterRoleAssignmentSpec struct {
-	// Subject defines the user or group for all role assignments.
+	// Subject defines the user, group, or service account for all role assignments.
 	// +kubebuilder:validation:Required
 	Subject Subject `json:"subject"`
 
@@ -34,25 +34,32 @@ type MulticlusterRoleAssignmentSpec struct {
 	RoleAssignments []RoleAssignment `json:"roleAssignments"`
 }
 
-// Subject defines the user or group for role assignments.
-// +kubebuilder:validation:XValidation:rule="!(self.kind in ['User', 'Group']) || !has(self.namespace) || size(self.namespace) == 0",message="namespace must be empty for User and Group kinds"
+// Subject defines the user, group, or service account for role assignments.
+// +kubebuilder:validation:XValidation:rule="!(self.kind in ['User', 'Group']) || !has(self.namespace)",message="Subject namespace must not be set for User and Group kinds"
+// +kubebuilder:validation:XValidation:rule="self.kind != 'ServiceAccount' || !has(self.apiGroup) || size(self.apiGroup) == 0",message="Subject apiGroup must be empty for ServiceAccount kind"
+// +kubebuilder:validation:XValidation:rule="self.kind != 'ServiceAccount' || (has(self.namespace) && size(self.namespace) > 0)",message="A namespace is required when subject kind is ServiceAccount"
 type Subject struct {
 	// API group of the referenced subject.
 	// +kubebuilder:validation:Enum="";rbac.authorization.k8s.io
 	// +optional
 	APIGroup string `json:"apiGroup,omitempty"`
 
-	// Kind of the subject. Accepted values are "User" and "Group".
+	// Kind of the subject. Accepted values are "User", "Group", and "ServiceAccount".
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Enum=User;Group
+	// +kubebuilder:validation:Enum=User;Group;ServiceAccount
 	Kind string `json:"kind"`
 
 	// Name of the subject.
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
 	Name string `json:"name"`
 
-	// Namespace of the referenced subject. Must be empty for "User" or "Group" kinds.
+	// Namespace of the referenced subject. Must not be set for "User" or "Group" kinds. Must be set for "ServiceAccount"
+	// kind. Must be a valid Kubernetes namespace name (DNS label).
 	// +optional
+	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:MaxLength=63
+	// +kubebuilder:validation:Pattern=`^[a-z0-9]([-a-z0-9]*[a-z0-9])?$`
 	Namespace string `json:"namespace,omitempty"`
 }
 
@@ -69,8 +76,12 @@ type RoleAssignment struct {
 	ClusterRole string `json:"clusterRole"`
 
 	// TargetNamespaces defines what namespaces the role should be applied in for all selected clusters in the role
-	// assignment. If TargetNamespaces is not present, the role will be applied to all clusters' namespaces.
+	// assignment. If TargetNamespaces is not present, the role will be applied to all clusters' namespaces. Each
+	// namespace must be a valid Kubernetes namespace name (DNS label).
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:items:MinLength=1
+	// +kubebuilder:validation:items:MaxLength=63
+	// +kubebuilder:validation:items:Pattern=`^[a-z0-9]([-a-z0-9]*[a-z0-9])?$`
 	TargetNamespaces []string `json:"targetNamespaces,omitempty"`
 
 	// ClusterSelection defines the type of cluster selection and the clusters to be selected.
@@ -80,14 +91,18 @@ type RoleAssignment struct {
 
 // PlacementRef represents a reference to a Placement resource
 type PlacementRef struct {
-	// Name of the Placement resource
+	// Name of the Placement resource. Must be a valid Kubernetes resource name (DNS subdomain).
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:MaxLength=253
+	// +kubebuilder:validation:Pattern=`^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`
 	Name string `json:"name"`
 
-	// Namespace of the Placement resource
+	// Namespace of the Placement resource. Must be a valid Kubernetes namespace name (DNS label).
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:MaxLength=63
+	// +kubebuilder:validation:Pattern=`^[a-z0-9]([-a-z0-9]*[a-z0-9])?$`
 	Namespace string `json:"namespace"`
 }
 
